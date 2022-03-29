@@ -1,16 +1,16 @@
 package net.querz.nbt.tag;
 
-import net.querz.io.MaxDepthIO;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiConsumer;
+//import java.util.function.BiConsumer;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-public class CompoundTag extends Tag<Map<String, Tag<?>>> implements Iterable<Map.Entry<String, Tag<?>>>, Comparable<CompoundTag>, MaxDepthIO {
+public class CompoundTag extends Tag<Map<String, Tag<?>>> implements Iterable<Map.Entry<String, Tag<?>>>, Comparable<CompoundTag> {
 
 	public static final byte ID = 10;
 
@@ -64,9 +64,11 @@ public class CompoundTag extends Tag<Map<String, Tag<?>>> implements Iterable<Ma
 		return entrySet().iterator();
 	}
 
+/*
 	public void forEach(BiConsumer<String, Tag<?>> action) {
 		getValue().forEach(action);
 	}
+*/
 
 	public <C extends Tag<?>> C get(String key, Class<C> type) {
 		Tag<?> t = getValue().get(key);
@@ -274,5 +276,20 @@ public class CompoundTag extends Tag<Map<String, Tag<?>>> implements Iterable<Ma
 			copy.put(e.getKey(), e.getValue().clone());
 		}
 		return copy;
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		for(Map.Entry<String, Tag<?>> entry : this) {
+			Tag<?> t = entry.getValue();
+			if(t.getID() == 0) {
+				throw new IOException("end tag not allowed");
+			}
+			stream.writeByte(t.getID());
+			stream.writeUTF(entry.getKey());
+			//stream.writeRawTag(t, decrementMaxDepth(max_depth));
+			t.write(stream, decrementMaxDepth(max_depth));
+		}
+		stream.writeByte(0);
 	}
 }

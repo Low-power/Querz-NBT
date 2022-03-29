@@ -1,5 +1,8 @@
 package net.querz.nbt.tag;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class StringTag extends Tag<String> implements Comparable<StringTag> {
 
 	public static final byte ID = 8;
@@ -46,5 +49,10 @@ public class StringTag extends Tag<String> implements Comparable<StringTag> {
 	@Override
 	public StringTag clone() {
 		return new StringTag(getValue());
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeUTF(getValue());
 	}
 }

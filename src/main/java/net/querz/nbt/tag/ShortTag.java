@@ -1,5 +1,8 @@
 package net.querz.nbt.tag;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ShortTag extends NumberTag<Short> implements Comparable<ShortTag> {
 
 	public static final byte ID = 2;
@@ -35,5 +38,10 @@ public class ShortTag extends NumberTag<Short> implements Comparable<ShortTag> {
 	@Override
 	public ShortTag clone() {
 		return new ShortTag(getValue());
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeShort(asShort());
 	}
 }

@@ -1,5 +1,8 @@
 package net.querz.nbt.tag;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class DoubleTag extends NumberTag<Double> implements Comparable<DoubleTag> {
 
 	public static final byte ID = 6;
@@ -35,5 +38,10 @@ public class DoubleTag extends NumberTag<Double> implements Comparable<DoubleTag
 	@Override
 	public DoubleTag clone() {
 		return new DoubleTag(getValue());
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeDouble(asDouble());
 	}
 }

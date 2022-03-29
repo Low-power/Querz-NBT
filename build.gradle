@@ -11,8 +11,8 @@ apply plugin: 'jacoco'
 group                        = 'net.querz.nbt'
 archivesBaseName             = 'nbt'
 version                      = '5.5'
-sourceCompatibility          = '1.8'
-targetCompatibility          = '1.8'
+sourceCompatibility          = '1.7'
+targetCompatibility          = '1.7'
 compileJava.options.encoding = 'UTF-8'
 
 repositories {
@@ -30,7 +30,7 @@ javadoc {
 	options.windowTitle 'NBT'
 	options.encoding 'UTF-8'
 	options.linkSource true
-	options.links 'https://docs.oracle.com/javase/8/docs/api/'
+	options.links 'https://docs.oracle.com/javase/7/docs/api/'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

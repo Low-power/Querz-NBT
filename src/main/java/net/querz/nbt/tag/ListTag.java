@@ -1,14 +1,15 @@
 package net.querz.nbt.tag;
 
-import net.querz.io.MaxDepthIO;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
+//import java.util.function.Consumer;
+import java.util.Collections;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
  * ListTag represents a typed List in the nbt structure.
@@ -17,14 +18,15 @@ import java.util.function.Consumer;
  * The type of an empty untyped {@link ListTag} can be set by using any of the {@code add()}
  * methods or any of the {@code as...List()} methods.
  * */
-public class ListTag<T extends Tag<?>> extends Tag<List<T>> implements Iterable<T>, Comparable<ListTag<T>>, MaxDepthIO {
+public class ListTag<T extends Tag<?>> extends Tag<List<T>> implements Iterable<T>, Comparable<ListTag<T>> {
 
 	public static final byte ID = 9;
 
 	private Class<?> typeClass = null;
 
+	@SuppressWarnings("unchecked")
 	private ListTag() {
-		super(createEmptyValue(3));
+		super((List)createEmptyValue(3));
 	}
 
 	@Override
@@ -63,8 +65,9 @@ public class ListTag<T extends Tag<?>> extends Tag<List<T>> implements Iterable<
 	 * @throws IllegalArgumentException When {@code typeClass} is {@link EndTag}{@code .class}
 	 * @throws NullPointerException When {@code typeClass} is {@code null}
 	 */
+	@SuppressWarnings("unchecked")
 	public ListTag(Class<? super T> typeClass) throws IllegalArgumentException, NullPointerException {
-		super(createEmptyValue(3));
+		super((List)createEmptyValue(3));
 		if (typeClass == EndTag.class) {
 			throw new IllegalArgumentException("cannot create ListTag with EndTag elements");
 		}
@@ -96,7 +99,7 @@ public class ListTag<T extends Tag<?>> extends Tag<List<T>> implements Iterable<
 	}
 
 	public void sort(Comparator<T> comparator) {
-		getValue().sort(comparator);
+		Collections.sort(getValue(), comparator);
 	}
 
 	@Override
@@ -104,10 +107,12 @@ public class ListTag<T extends Tag<?>> extends Tag<List<T>> implements Iterable<
 		return getValue().iterator();
 	}
 
+/*
 	@Override
 	public void forEach(Consumer<? super T> action) {
 		getValue().forEach(action);
 	}
+*/
 
 	public T set(int index, T t) {
 		return getValue().set(index, Objects.requireNonNull(t));
@@ -322,6 +327,16 @@ public class ListTag<T extends Tag<?>> extends Tag<List<T>> implements Iterable<
 			throw new ClassCastException(String.format(
 					"cannot cast ListTag<%s> to ListTag<%s>",
 					typeClass.getSimpleName(), clazz.getSimpleName()));
+		}
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeByte(idFromClass(getTypeClass()));
+		stream.writeInt(size());
+		for(Tag<?> t : getValue()) {
+			//stream.writeRawTag(t, decrementMaxDepth(max_depth));
+			t.write(stream, decrementMaxDepth(max_depth));
 		}
 	}
 }

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
-public class NBTDeserializer implements Deserializer<NamedTag> {
+public class NBTDeserializer extends Deserializer<NamedTag> {
 
 	private boolean compressed;
 

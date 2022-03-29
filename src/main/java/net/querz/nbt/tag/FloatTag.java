@@ -1,5 +1,8 @@
 package net.querz.nbt.tag;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class FloatTag extends NumberTag<Float> implements Comparable<FloatTag> {
 
 	public static final byte ID = 5;
@@ -35,5 +38,10 @@ public class FloatTag extends NumberTag<Float> implements Comparable<FloatTag> {
 	@Override
 	public FloatTag clone() {
 		return new FloatTag(getValue());
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeFloat(asFloat());
 	}
 }

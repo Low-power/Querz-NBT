@@ -1,5 +1,8 @@
 package net.querz.nbt.tag;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class IntTag extends NumberTag<Integer> implements Comparable<IntTag> {
 
 	public static final byte ID = 3;
@@ -35,5 +38,10 @@ public class IntTag extends NumberTag<Integer> implements Comparable<IntTag> {
 	@Override
 	public IntTag clone() {
 		return new IntTag(getValue());
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeInt(asInt());
 	}
 }

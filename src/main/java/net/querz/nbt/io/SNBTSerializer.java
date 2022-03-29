@@ -5,7 +5,7 @@ import net.querz.nbt.tag.Tag;
 import java.io.IOException;
 import java.io.Writer;
 
-public class SNBTSerializer implements StringSerializer<Tag<?>> {
+public class SNBTSerializer extends StringSerializer<Tag<?>> {
 
 	@Override
 	public void toWriter(Tag<?> tag, Writer writer) throws IOException {

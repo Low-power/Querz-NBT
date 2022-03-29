@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public final class SNBTParser implements MaxDepthIO {
+public final class SNBTParser extends MaxDepthIO {
 
 	private static final Pattern
 			FLOAT_LITERAL_PATTERN = Pattern.compile("^[-+]?(?:\\d+\\.?|\\d*\\.\\d+)(?:e[-+]?\\d+)?f$", Pattern.CASE_INSENSITIVE),
@@ -217,7 +217,9 @@ public final class SNBTParser implements MaxDepthIO {
 			}
 		}
 		ptr.expectChar(']');
-		return new IntArrayTag(intList.stream().mapToInt(i -> i).toArray());
+		int[] array = new int[intList.size()];
+		for(int i = 0; i < array.length; i++) array[i] = intList.get(i);
+		return new IntArrayTag(array);
 	}
 
 	private LongArrayTag parseLongArrayTag() throws ParseException {
@@ -239,6 +241,8 @@ public final class SNBTParser implements MaxDepthIO {
 			}
 		}
 		ptr.expectChar(']');
-		return new LongArrayTag(longList.stream().mapToLong(l -> l).toArray());
+		long[] array = new long[longList.size()];
+		for(int i = 0; i < array.length; i++) array[i] = longList.get(i);
+		return new LongArrayTag(array);
 	}
 }

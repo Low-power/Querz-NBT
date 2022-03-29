@@ -8,22 +8,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public interface Deserializer<T> {
+public abstract class Deserializer<T> {
 
-	T fromStream(InputStream stream) throws IOException;
+	public abstract T fromStream(InputStream stream) throws IOException;
 
-	default T fromFile(File file) throws IOException {
+	public T fromFile(File file) throws IOException {
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
 			return fromStream(bis);
 		}
 	}
 
-	default T fromBytes(byte[] data) throws IOException {
+	public T fromBytes(byte[] data) throws IOException {
 		ByteArrayInputStream stream = new ByteArrayInputStream(data);
 		return fromStream(stream);
 	}
 
-	default T fromResource(Class<?> clazz, String path) throws IOException {
+	public T fromResource(Class<?> clazz, String path) throws IOException {
 		try (InputStream stream = clazz.getClassLoader().getResourceAsStream(path)) {
 			if (stream == null) {
 				throw new IOException("resource \"" + path + "\" not found");
@@ -32,11 +32,10 @@ public interface Deserializer<T> {
 		}
 	}
 
-	default T fromURL(URL url) throws IOException {
+	public T fromURL(URL url) throws IOException {
 		try (InputStream stream = url.openStream()) {
 			return fromStream(stream);
 		}
 	}
-
 
 }

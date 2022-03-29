@@ -1,5 +1,8 @@
 package net.querz.nbt.tag;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class LongTag extends NumberTag<Long> implements Comparable<LongTag> {
 
 	public static final byte ID = 4;
@@ -35,5 +38,10 @@ public class LongTag extends NumberTag<Long> implements Comparable<LongTag> {
 	@Override
 	public LongTag clone() {
 		return new LongTag(getValue());
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeLong(asLong());
 	}
 }

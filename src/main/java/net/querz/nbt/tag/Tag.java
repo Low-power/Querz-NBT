@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 
 /**
  * Base class for all NBT tags.
@@ -184,4 +187,123 @@ public abstract class Tag<T> implements Cloneable {
 		}
 		return sb.toString();
 	}
+
+	public abstract void write(DataOutputStream stream, int max_depth) throws IOException;
+
+	private static Map<Class<?>, Byte> classIdMapping = new HashMap<>();
+	private static Map<Byte, Class<?>> idClassMapping = new HashMap<>();
+	static {
+		classIdMapping.put(EndTag.class, Byte.valueOf(EndTag.ID));
+		classIdMapping.put(ByteTag.class, Byte.valueOf(ByteTag.ID));
+		classIdMapping.put(ShortTag.class, Byte.valueOf(ShortTag.ID));
+		classIdMapping.put(IntTag.class, Byte.valueOf(IntTag.ID));
+		classIdMapping.put(LongTag.class, Byte.valueOf(LongTag.ID));
+		classIdMapping.put(FloatTag.class, Byte.valueOf(FloatTag.ID));
+		classIdMapping.put(DoubleTag.class, Byte.valueOf(DoubleTag.ID));
+		classIdMapping.put(StringTag.class, Byte.valueOf(StringTag.ID));
+		classIdMapping.put(ListTag.class, Byte.valueOf(ListTag.ID));
+		classIdMapping.put(CompoundTag.class, Byte.valueOf(CompoundTag.ID));
+		classIdMapping.put(ByteArrayTag.class, Byte.valueOf(ByteArrayTag.ID));
+		classIdMapping.put(IntArrayTag.class, Byte.valueOf(IntArrayTag.ID));
+		classIdMapping.put(LongArrayTag.class, Byte.valueOf(LongArrayTag.ID));
+		idClassMapping.put(Byte.valueOf(EndTag.ID), EndTag.class);
+		idClassMapping.put(Byte.valueOf(ByteTag.ID), ByteTag.class);
+		idClassMapping.put(Byte.valueOf(ShortTag.ID), ShortTag.class);
+		idClassMapping.put(Byte.valueOf(IntTag.ID), IntTag.class);
+		idClassMapping.put(Byte.valueOf(LongTag.ID), LongTag.class);
+		idClassMapping.put(Byte.valueOf(FloatTag.ID), FloatTag.class);
+		idClassMapping.put(Byte.valueOf(DoubleTag.ID), DoubleTag.class);
+		idClassMapping.put(Byte.valueOf(StringTag.ID), StringTag.class);
+		idClassMapping.put(Byte.valueOf(ListTag.ID), ListTag.class);
+		idClassMapping.put(Byte.valueOf(CompoundTag.ID), CompoundTag.class);
+		idClassMapping.put(Byte.valueOf(ByteArrayTag.ID), ByteArrayTag.class);
+		idClassMapping.put(Byte.valueOf(IntArrayTag.ID), IntArrayTag.class);
+		idClassMapping.put(Byte.valueOf(LongArrayTag.ID), LongArrayTag.class);
+	}
+
+	protected static int decrementMaxDepth(int max_depth) {
+		if(max_depth < 0) throw new IllegalArgumentException("negative maximum depth is not allowed");
+		if(max_depth == 0) throw new MaxDepthReachedException("reached maximum depth of NBT structure");
+		return --max_depth;
+	}
+
+	protected static byte idFromClass(Class<?> clazz) {
+		Byte id = classIdMapping.get(clazz);
+		if (id == null) {
+			throw new IllegalArgumentException("unknown Tag class " + clazz.getName());
+		}
+		return id.byteValue();
+	}
+
+	public static Tag<?> read(byte type_id, DataInputStream stream, int max_depth) throws IOException {
+		switch(type_id) {
+			case EndTag.ID:
+				return EndTag.INSTANCE;
+			case ByteTag.ID:
+				return new ByteTag(stream.readByte());
+			case ShortTag.ID:
+				return new ShortTag(stream.readShort());
+			case IntTag.ID:
+				return new IntTag(stream.readInt());
+			case LongTag.ID:
+				return new LongTag(stream.readLong());
+			case FloatTag.ID:
+				return new FloatTag(stream.readFloat());
+			case DoubleTag.ID:
+				return new DoubleTag(stream.readDouble());
+			case StringTag.ID:
+				return new StringTag(stream.readUTF());
+			case ListTag.ID:
+				type_id = stream.readByte();
+				{
+					ListTag<?> list = ListTag.createUnchecked(idClassMapping.get(Byte.valueOf(type_id)));
+					int length = stream.readInt();
+					if(length < 0) length = 0;
+					for (int i = 0; i < length; i++) {
+						list.addUnchecked(read(type_id, stream, decrementMaxDepth(max_depth)));
+					}
+					return list;
+				}
+			case CompoundTag.ID:
+				{
+					CompoundTag comp = new CompoundTag();
+					int id;
+					while((id = stream.readByte() & 0xff) != 0) {
+						String key = stream.readUTF();
+						Tag<?> element = read((byte)id, stream, decrementMaxDepth(max_depth));
+						comp.put(key, element);
+					}
+					return comp;
+				}
+			case ByteArrayTag.ID:
+				{
+					ByteArrayTag t = new ByteArrayTag(new byte[stream.readInt()]);
+					stream.readFully(t.getValue());
+					return t;
+				}
+			case IntArrayTag.ID:
+				{
+					int[] a = new int[stream.readInt()];
+					IntArrayTag t = new IntArrayTag(a);
+					for(int i = 0; i < a.length; i++) a[i] = stream.readInt();
+					return t;
+				}
+			case LongArrayTag.ID:
+				{
+					long[] a = new long[stream.readInt()];
+					LongArrayTag t = new LongArrayTag(a);
+					for(int i = 0; i < a.length; i++) a[i] = stream.readLong();
+					return t;
+				}
+			default:
+				throw new IOException("invalid tag type id " + String.valueOf(type_id));
+		}
+	}
+
+/*
+	public static Tag<?> read(DataInputStream stream, int max_depth) throws IOException {
+		byte type_id = stream.readByte();
+		return read(type_id, stream, max_depth);
+	}
+*/
 }

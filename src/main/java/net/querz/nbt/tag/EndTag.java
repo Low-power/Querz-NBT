@@ -1,5 +1,7 @@
 package net.querz.nbt.tag;
 
+import java.io.DataOutputStream;
+
 public final class EndTag extends Tag<Void> {
 
 	public static final byte ID = 0;
@@ -27,5 +29,9 @@ public final class EndTag extends Tag<Void> {
 	@Override
 	public EndTag clone() {
 		return INSTANCE;
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) {
 	}
 }

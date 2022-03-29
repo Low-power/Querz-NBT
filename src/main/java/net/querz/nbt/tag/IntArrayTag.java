@@ -1,6 +1,8 @@
 package net.querz.nbt.tag;
 
 import java.util.Arrays;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class IntArrayTag extends ArrayTag<int[]> implements Comparable<IntArrayTag> {
 
@@ -38,5 +40,13 @@ public class IntArrayTag extends ArrayTag<int[]> implements Comparable<IntArrayT
 	@Override
 	public IntArrayTag clone() {
 		return new IntArrayTag(Arrays.copyOf(getValue(), length()));
+	}
+
+	@Override
+	public void write(DataOutputStream stream, int max_depth) throws IOException {
+		stream.writeInt(length());
+		for(int i : getValue()) {
+			stream.writeInt(i);
+		}
 	}
 }

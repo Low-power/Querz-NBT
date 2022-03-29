@@ -8,30 +8,30 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-public interface StringDeserializer<T> extends Deserializer<T> {
+public abstract class StringDeserializer<T> extends Deserializer<T> {
 
-	T fromReader(Reader reader) throws IOException;
+	public abstract T fromReader(Reader reader) throws IOException;
 
-	default T fromString(String s) throws IOException {
+	public T fromString(String s) throws IOException {
 		return fromReader(new StringReader(s));
 	}
 
 	@Override
-	default T fromStream(InputStream stream) throws IOException {
+	public T fromStream(InputStream stream) throws IOException {
 		try (Reader reader = new InputStreamReader(stream)) {
 			return fromReader(reader);
 		}
 	}
 
 	@Override
-	default T fromFile(File file) throws IOException {
+	public T fromFile(File file) throws IOException {
 		try (Reader reader = new FileReader(file)) {
 			return fromReader(reader);
 		}
 	}
 
 	@Override
-	default T fromBytes(byte[] data) throws IOException {
+	public T fromBytes(byte[] data) throws IOException {
 		return fromReader(new StringReader(new String(data)));
 	}
 }

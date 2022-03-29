@@ -5,9 +5,8 @@ import net.querz.nbt.tag.Tag;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.stream.Collectors;
 
-public class SNBTDeserializer implements StringDeserializer<Tag<?>> {
+public class SNBTDeserializer extends StringDeserializer<Tag<?>> {
 
 	@Override
 	public Tag<?> fromReader(Reader reader) throws IOException {
@@ -21,6 +20,9 @@ public class SNBTDeserializer implements StringDeserializer<Tag<?>> {
 		} else {
 			bufferedReader = new BufferedReader(reader);
 		}
-		return SNBTParser.parse(bufferedReader.lines().collect(Collectors.joining()), maxDepth);
+		StringBuilder s = new StringBuilder();
+		String line;
+		while((line = bufferedReader.readLine()) != null) s.append(line);
+		return SNBTParser.parse(s.toString(), maxDepth);
 	}
 }

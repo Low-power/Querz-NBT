@@ -10,9 +10,29 @@ import java.util.zip.InflaterInputStream;
 
 public enum CompressionType {
 
-	NONE(0, t -> t, t -> t),
-	GZIP(1, GZIPOutputStream::new, GZIPInputStream::new),
-	ZLIB(2, DeflaterOutputStream::new, InflaterInputStream::new);
+	NONE(0, new ExceptionFunction<OutputStream, OutputStream, IOException>() {
+			public OutputStream accept(OutputStream s) { return s; }
+		}, new ExceptionFunction<InputStream, InputStream, IOException>() {
+			public InputStream accept(InputStream s) { return s; }
+		}),
+	GZIP(1, new ExceptionFunction<OutputStream, GZIPOutputStream, IOException>() {
+			public GZIPOutputStream accept(OutputStream s) throws IOException {
+				return new GZIPOutputStream(s);
+			}
+		}, new ExceptionFunction<InputStream, GZIPInputStream, IOException>() {
+			public GZIPInputStream accept(InputStream s) throws IOException {
+				return new GZIPInputStream(s);
+			}
+		}),
+	ZLIB(2, new ExceptionFunction<OutputStream, DeflaterOutputStream, IOException>() {
+			public DeflaterOutputStream accept(OutputStream s) throws IOException {
+				return new DeflaterOutputStream(s);
+			}
+		}, new ExceptionFunction<InputStream, InflaterInputStream, IOException>() {
+			public InflaterInputStream accept(InputStream s) throws IOException {
+				return new InflaterInputStream(s);
+			}
+		});
 
 	private byte id;
 	private ExceptionFunction<OutputStream, ? extends OutputStream, IOException> compressor;
